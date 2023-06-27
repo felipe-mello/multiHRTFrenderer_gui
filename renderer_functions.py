@@ -28,7 +28,9 @@ def sofa_setup(SOFAfiles):
     return Objs, samplingRate, fs
 
 
-def start_audio(fs, buffer_sz, audio_in, sofaIDXmanager, SOFAfiles, isHeadTracker, PosManager, HTreceiver, FIRfilt, Objs):
+def start_audio(fs, buffer_sz, audio_in, sofaIDXmanager, SOFAfiles,
+                isHeadTracker, PosManager, HTreceiver, FIRfilt, Objs,
+                stop_event, idxSOFA):
     # instantiate PyAudio (1)
     p = pyaudio.PyAudio()
     stream = p.open(format=pyaudio.paFloat32,
@@ -46,7 +48,7 @@ def start_audio(fs, buffer_sz, audio_in, sofaIDXmanager, SOFAfiles, isHeadTracke
 
     while True:
         # check if dataset has changed
-        idxSOFA_tmp = sofaIDXmanager.latest
+        idxSOFA_tmp = idxSOFA
         if idxSOFA_tmp < len(SOFAfiles): # only update if index is within range
             idxSOFA = deepcopy(idxSOFA_tmp)
 
@@ -68,6 +70,9 @@ def start_audio(fs, buffer_sz, audio_in, sofaIDXmanager, SOFAfiles, isHeadTracke
         if frame_end >= sigLen:
             frame_start = 0
             frame_end = frame_start + buffer_sz
+            
+        if stop_event.is_set():
+            break
 
     # stop stream (4)
     stream.stop_stream()
