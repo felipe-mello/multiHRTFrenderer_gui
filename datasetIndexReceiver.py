@@ -25,6 +25,10 @@ class DatasetIndexReceiver():
         self.t1 = threading.Thread(target=self.reader, daemon=True).start()
         self.t2 = threading.Thread(target=self.controlHotKeys, daemon=True).start()
 
+
+    def __del__(self):
+      print ("Position Manager deleted!");    
+
     # Receive messages from external app
     def reader(self):
         print('HRTF manager initialized')
@@ -97,6 +101,7 @@ class DatasetIndexReceiver():
                 send4 = False
                 self.latest = 4
                 print(f'Dataset: {self.latest}')
+                   
 
 if __name__ == '__main__':
     a = DatasetIndexReceiver()

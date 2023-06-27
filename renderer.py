@@ -6,6 +6,7 @@ Authors: Davi Rocha Carvalho
 '''
 
 # %% Import libs
+
 import sofar
 import pyaudio
 import warnings
@@ -18,6 +19,10 @@ from geometry import GeomtryFunctions
 from EACheadtracker import HeadTracker
 from positionReceiver import PositionReceiver
 from datasetIndexReceiver import DatasetIndexReceiver
+
+# GUI prototype
+import os
+import PySimpleGUI as sg
 
 
 # %% Global configs ##################################################################
@@ -35,8 +40,10 @@ DS_PORT = 5556
 buffer_sz = 512
 method = 'upols'  # FIR method
 
-# List the files you wanna load
-SOFAfiles = ['SOFA/HRTF_individualizada_44.1kHz.sofa']
+# List all SOFA files in the SOFA directory
+SOFAfiles_tmp = os.listdir('SOFA/')
+SOFAfiles = ['SOFA/' + tmp for tmp in SOFAfiles_tmp]
+    
 
 # Audio path'
 audioPath = 'Audio/drums.wav'

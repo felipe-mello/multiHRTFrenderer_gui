@@ -58,6 +58,9 @@ class PositionReceiver():
         self.x = float(splitStr[3])
         self.y = float(splitStr[4])
         self.z = float(splitStr[5])
+        
+    def __del__(self):
+      print ("Position Manager deleted!");
 
 if __name__ == '__main__':
     a = PositionReceiver()
