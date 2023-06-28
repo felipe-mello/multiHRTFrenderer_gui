@@ -20,6 +20,7 @@ class PositionReceiver():
         self.x = 0
         self.y = 1
         self.z = 1
+        self.rightAnswer = []
 
         # create path to store position when requested
         self.save_path = os.path.join(os.getcwd(), user_save_path) # Changed by Felipe
@@ -43,8 +44,10 @@ class PositionReceiver():
                                 'z': self.z,
                                 'yaw': self.yaw,
                                 'pitch': self.pitch,
-                                'roll': self.roll}
-                    np.savez(fullpath, posi=position, time=time.localtime())
+                                'roll': self.roll
+                                }
+                    rightAns = {'rightAnswer': self.rightAnswer} # A resposta certa de acordo com a posição pré-selecionada da fonte
+                    np.savez(fullpath, posi=position, rightAnswer=rightAns, time=time.localtime())
                     print(f'Saved position {idx_save}')
                 else:  # store the receive position
                     self.latest = data.decode()

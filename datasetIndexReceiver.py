@@ -54,8 +54,9 @@ class DatasetIndexReceiver():
         send3 = False   
         send4 = False  
         while True:
-            time.sleep(0.1)  
-            if keyboard.is_pressed('space'):
+            time.sleep(0.01)
+            # For using with the pointer/slide controler 
+            if keyboard.is_pressed('right'):
                 savepos = True
 
 
@@ -71,7 +72,7 @@ class DatasetIndexReceiver():
                 send4 = True
 
             # take action after key release
-            if (not keyboard.is_pressed('space') and savepos):  # capture position
+            if (not keyboard.is_pressed('right') and savepos):  # capture position
                 savepos = False
                 # print('space') 
                 self.sock_send.sendto('captur'.encode(), self.ADDR_snd)
