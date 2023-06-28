@@ -334,6 +334,7 @@ while True:
 Próximos passos:
     i) salvar quando a pessoa aperta o espaço
     ii) validar a posição na tela (para o operador ver)
+    iii) adicionar no save qual HRTF foi utilizada e qual áudio tbm
 '''
  
 
