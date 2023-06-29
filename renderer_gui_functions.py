@@ -84,21 +84,17 @@ def start_audio(fs, buffer_sz, audio_in, sofaIDXmanager, SOFAfiles,
     stream.close()
     # close PyAudio (5)
     p.terminate()
-    
-def savePosition(data):
-    savepos = False  
-    while True:
-        time.sleep(0.1)
-        # For using with the pointer/slide controler 
-        if keyboard.is_pressed('right'):
-            savepos = True
+
+# Not actually used...
+# def savePosition(data):
+#     savepos = False  
+#     while True:
+#         time.sleep(0.1)
+#         # For using with the pointer/slide controler 
+#         if keyboard.is_pressed('right'):
+#             savepos = True
             
-        # take action after key release
-        if (not keyboard.is_pressed('right') and savepos):  # capture position
-            savepos = False
+#         # take action after key release
+#         if (not keyboard.is_pressed('right') and savepos):  # capture position
+#             savepos = False
             
-def move_center(window):
-    screen_width, screen_height = window.get_screen_dimensions()
-    win_width, win_height = window.size
-    x, y = (screen_width - win_width)//2, (screen_height - win_height)//2
-    window.move(x, y)

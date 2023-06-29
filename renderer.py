@@ -49,6 +49,8 @@ SOFAfiles = ['SOFA/' + tmp for tmp in SOFAfiles_tmp]
 audioPath = 'Audio/drums.wav'
 # audioPath = 'Audio/sabine.wav'
 
+# Position savepath
+positionPath = 'Captured_Positions'
 
 # Source position
 ''' NOTE os angulos são em coordenadas "navigacionais"
@@ -94,7 +96,7 @@ N_ch = audio_in.shape[-1]
 if isHeadTracker:
     thread = threading.Thread(target=HeadTracker.start, args=(CAM_ID, HT_PORT), daemon=False)  # track listener position
     thread.start()
-    HTreceiver = PositionReceiver(IP=HT_IP, PORT=HT_PORT)  # read head tracker position data
+    HTreceiver = PositionReceiver(positionPath, IP=HT_IP, PORT=HT_PORT)  # read head tracker position data
 
     # convert positions to navigational coordinates for ease to use
     def sph2cart(posArray):
@@ -132,7 +134,6 @@ sigLen = audio_in.shape[0]
 data_out = np.zeros((buffer_sz, 2))
 frame_start = 0
 frame_end = frame_start + buffer_sz
-
 while True:
     # check if dataset has changed
     idxSOFA_tmp = sofaIDXmanager.latest

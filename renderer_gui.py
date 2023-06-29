@@ -14,23 +14,21 @@ Authors: Davi Rocha Carvalho
 
 # %% Import libs
 
-import pyaudio
 import threading
 import numpy as np
 import soundfile as sf
 import time
 import random
-from copy import deepcopy
 from FIRconv import FIRfilter
 from geometry import GeomtryFunctions
 from EACheadtracker import HeadTracker
 from positionReceiver import PositionReceiver
 from datasetIndexReceiver import DatasetIndexReceiver
 
-# GUI prototype
+# For the GUI
 import os
 import PySimpleGUI as sg
-import renderer_functions as rfx
+import renderer_gui_functions as rfx
 
 
 # %% Global configs ##################################################################
@@ -48,8 +46,9 @@ DS_PORT = 5556
 buffer_sz = 512
 method = 'upols'  # FIR method
 
-# 
+# Temp variables
 SOFAfiles_tmp = []
+audioPath_tmp = []
 
 # Source position
 ''' NOTE os angulos são em coordenadas "navigacionais"
@@ -80,18 +79,23 @@ layout = [
          sg.OptionMenu(values=sofa_files, default_value='Generic HRTF', key="-HRTF_2-", size=(20,20), pad=(5,20)),
         ],
         
-        [sg.Button('Setup', size=(10,2), font=font, button_color="orange", pad=(20,20)),
-         sg.Button('Start', size=(10,2), font=font, button_color="green", pad=(20, 20), disabled=True, key='-START-')],
+        [#sg.OptionMenu(values=audio_files, default_value='Audio File', key="-AUDIO_FILE-", size=(20,20)),
+         sg.OptionMenu(values=audio_files, default_value='Audio File 1', key="-AUDIO_1-", size=(20,20), pad=(5,10)),
+         sg.OptionMenu(values=audio_files, default_value='Audio File 2', key="-AUDIO_2-", size=(20,20), pad=(5,10)),
+        ],
         
-        [sg.Text('Wating for setup...', key='-STATUS_TEXT-', font=("OpenSans", 20), justification='center', pad=(0, 20))],
+        [sg.Button('Setup', size=(10,2), font=font, button_color="orange", pad=(20,10)),
+         sg.Button('Start', size=(10,2), font=font, button_color="green", pad=(20, 10), disabled=True, key='-START-')],
         
-        [sg.Text('', key='-STATUS_TEXT_2-', font=("OpenSans", 20), justification='center', pad=(0, 20))],
+        [sg.Text('Wating for setup...', key='-STATUS_TEXT-', font=("OpenSans", 20), justification='center', pad=(0, 10))],
         
-        [sg.Button('Next audio', key='-NEXT-', size=(25,2), font=font, disabled=True, pad=(0, 20))],
+        [sg.Text('', key='-STATUS_TEXT_2-', font=("OpenSans", 20), justification='center', pad=(0, 10))],
         
-        [sg.Text('', key='-TEST_SEQ-', font=("OpenSans", 20), justification='center', pad=(0,20))],
+        [sg.Button('Next audio', key='-NEXT-', size=(25,2), font=font, disabled=True, pad=(0, 10))],
         
-        [sg.Text('', key='-TEST_NUM-', font=("OpenSans", 20), justification='center', pad=(0,20))]
+        [sg.Text('', key='-TEST_SEQ-', font=("OpenSans", 20), justification='center', pad=(0,10))],
+        
+        [sg.Text('', key='-TEST_NUM-', font=("OpenSans", 20), justification='center', pad=(0,10))]
         
     ]
 
@@ -100,13 +104,14 @@ layout = [
 if isHeadTracker:
     thread = threading.Thread(target=HeadTracker.start, args=(CAM_ID, HT_PORT), daemon=False)  # track listener position
     thread.start()
-    # HTreceiver = PositionReceiver(save_path, IP=HT_IP, PORT=HT_PORT)  # read head tracker position data
 
 time.sleep(2)
 
+# Define a window GUI object
 window = sg.Window('multiHRTFrenderer', layout, element_justification='c',
-                   font=font, return_keyboard_events=True, size=(900, 800))
+                   font=font, return_keyboard_events=True, size=(900, 700))
 
+# Start the window
 while True:
     event, values = window.read()
        
@@ -116,7 +121,6 @@ while True:
         os._exit(00)
         break
     
- 
  #################################################################################################
  #################################################################################################   
  
@@ -130,6 +134,13 @@ while True:
             os.makedirs('subjects/' + values['-SUBJECT-'])
             
         save_path= 'subjects/' + values['-SUBJECT-']
+        
+        # Set the audio file to be played
+        testCounter = 0
+        audioCounter = 0
+        saveCount = 1
+        audioPath_tmp.extend([values['-AUDIO_1-'], values['-AUDIO_2-']])
+        audioPath = ['Audio/' + tmp for tmp in audioPath_tmp]
         
         # Azimuth and elevation for audio 1
         az1 = [30, 0]
@@ -147,12 +158,12 @@ while True:
         seq = []
         
         for ii in range(len(az1)):
-            seq1.append([az1[ii], el1[ii], hrtf[0]])
-            seq1.append([az1[ii], el1[ii], hrtf[1]])
+            seq1.append([az1[ii], el1[ii], hrtf[0], audioPath[0][6:]])
+            seq1.append([az1[ii], el1[ii], hrtf[1], audioPath[0][6:]])
         
         for ii in range(len(az2)):
-            seq2.append([az2[ii], el2[ii], hrtf[0]])
-            seq2.append([az2[ii], el2[ii], hrtf[1]])
+            seq2.append([az2[ii], el2[ii], hrtf[0], audioPath[1][6:]])
+            seq2.append([az2[ii], el2[ii], hrtf[1], audioPath[1][6:]])
         
         random.shuffle(seq1)
         random.shuffle(seq2)
@@ -161,12 +172,6 @@ while True:
         seq.extend(seq2)
         
         testNum = len(seq)
-        
-        # Set the audio file to be played
-        testCounter = 0
-        audioCounter = 0
-        saveCount = 1
-        audioPath = ['Audio/drums.wav', 'Audio/sabine.wav']
         
         # Set the SOFA files to be loaded
         SOFAfiles_tmp.extend([values['-HRTF_1-'], values['-HRTF_2-']])
@@ -330,12 +335,7 @@ while True:
     if event == 'Right:39':
         window['-TEST_SEQ-'].update('The subject has pressed the button!')
 
-'''
-Próximos passos:
-    i) salvar quando a pessoa aperta o espaço
-    ii) validar a posição na tela (para o operador ver)
-    iii) adicionar no save qual HRTF foi utilizada e qual áudio tbm
-'''
+
  
 
 

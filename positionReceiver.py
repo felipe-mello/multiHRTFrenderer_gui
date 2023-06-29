@@ -28,7 +28,12 @@ class PositionReceiver():
             os.makedirs(self.save_path)
 
         self.t = threading.Thread(target=self.reader, daemon=True).start()
-
+        
+    '''
+    FELIPE: adicionei esse rightAnswer, que corresponde aos ângulos de azimute e elevação
+    pré-definidos para os testes. Assim é possível comparar a posição marcada pelo sujeito
+    com a que foi de fato reproduzida.
+    '''
     def reader(self):
         print('position receiver initialized')
         idx_save = 0
