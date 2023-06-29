@@ -49,11 +49,11 @@ class DatasetIndexReceiver():
         while True:
             time.sleep(0.1)  
 
-            # capture position
-            if keyboard.is_pressed('space'):
+            # capture position (use 'right' key)
+            if keyboard.is_pressed('right'):
                 savepos = True
 
-            if (not keyboard.is_pressed('space') and savepos): 
+            if (not keyboard.is_pressed('right') and savepos): 
                 savepos = False
                 # print('space') 
                 self.sock_send.sendto('captur'.encode(), self.ADDR_snd)

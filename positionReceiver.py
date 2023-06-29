@@ -5,9 +5,11 @@ import socket
 import threading
 import numpy as np
 
-
+'''
+FELIPE: added a "user_save_path" variable for the captured positions
+'''
 class PositionReceiver():
-    def __init__(self, IP='0.0.0.0', PORT=5555):
+    def __init__(self, user_save_path, IP='0.0.0.0', PORT=5555):
         self.sock = socket.socket(socket.AF_INET,  # Internet
                                   socket.SOCK_DGRAM)  # UDP
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -18,14 +20,20 @@ class PositionReceiver():
         self.x = 0
         self.y = 1
         self.z = 1
+        self.rightAnswer = []
 
         # create path to store position when requested
-        self.save_path = os.path.join(os.getcwd(), 'Captured_Positions')
+        self.save_path = os.path.join(os.getcwd(), user_save_path) # Changed by Felipe
         if not os.path.isdir(self.save_path):
             os.makedirs(self.save_path)
 
         self.t = threading.Thread(target=self.reader, daemon=True).start()
-
+        
+    '''
+    FELIPE: adicionei esse rightAnswer, que corresponde aos ângulos de azimute e elevação
+    pré-definidos para os testes. Assim é possível comparar a posição marcada pelo sujeito
+    com a que foi de fato reproduzida.
+    '''
     def reader(self):
         print('position receiver initialized')
         idx_save = 0
@@ -41,8 +49,10 @@ class PositionReceiver():
                                 'z': self.z,
                                 'yaw': self.yaw,
                                 'pitch': self.pitch,
-                                'roll': self.roll}
-                    np.savez(fullpath, posi=position, time=time.localtime())
+                                'roll': self.roll
+                                }
+                    rightAns = {'rightAnswer': self.rightAnswer} # A resposta certa de acordo com a posição pré-selecionada da fonte
+                    np.savez(fullpath, posi=position, rightAnswer=rightAns, time=time.localtime())
                     print(f'Saved position {idx_save}')
                 else:  # store the receive position
                     self.latest = data.decode()
@@ -58,6 +68,9 @@ class PositionReceiver():
         self.x = float(splitStr[3])
         self.y = float(splitStr[4])
         self.z = float(splitStr[5])
+        
+    def __del__(self):
+      print ("Position Manager deleted!");
 
 if __name__ == '__main__':
     a = PositionReceiver()
