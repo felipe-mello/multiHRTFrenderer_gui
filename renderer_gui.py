@@ -143,18 +143,19 @@ while True:
         audioPath = ['Audio/' + tmp for tmp in audioPath_tmp]
         
         # Azimuth and elevation for audio 1
-        az1 = [30, 0]
-        el1 = [30, 70]
+        az1 = [30, -15, -45, 30]
+        el1 = [0, 0, 0, 45]
         
         # Azimuth and elevation for audio 2
-        az2 = [-40, -20]
-        el2 = [-70, 60]
+        az2 = [-30, 15, 45, -30]
+        el2 = [0, 0, 0, 45]
         
         hrtf = ['HRTF: Individualized', 'HRTF: Generic']
         
         # Set a random test sequence
         seq1 = []
         seq2 = []
+        seqRand = []
         seq = []
         
         for ii in range(len(az1)):
@@ -165,11 +166,13 @@ while True:
             seq2.append([az2[ii], el2[ii], hrtf[0], audioPath[1][6:]])
             seq2.append([az2[ii], el2[ii], hrtf[1], audioPath[1][6:]])
         
-        random.shuffle(seq1)
-        random.shuffle(seq2)
+        # Randomize the sequence
+        seqRand.extend(seq1)
+        seqRand.extend(seq2)
+        random.shuffle(seqRand)
         
-        seq.extend(seq1)
-        seq.extend(seq2)
+        seq.extend([[0, 0, hrtf[0], audioPath[0][6:]]]) # Sinal de "calibração" ao centro
+        seq.extend(seqRand)
         
         testNum = len(seq)
         
@@ -268,7 +271,12 @@ while True:
         testCounter += 1
         
         # Activate next audio
-        if testCounter >= len(seq1):
+        # if testCounter >= len(seq1):
+        #     audioCounter = 1
+        
+        if seq[testCounter][3] == audioPath[0][6:]:    
+            audioCounter = 0
+        elif seq[testCounter][3] == audioPath[1][6:]:    
             audioCounter = 1
         
         # When both audios are played, do nothing more
